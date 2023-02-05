@@ -69,17 +69,17 @@ jobs:
 
   test-frontend:
     docker:
-      - image: cimg/node:13.8.0   
+      - image: cimg/node:13.8.0
     steps:
       - checkout
       - restore_cache:
-          Keys: [frontend-build]
+          keys: [frontend-build]
       - run:
-          name: front-end unit test
+          name: test front-end
           command: |
-             cd frontend
-             npm install
-             npm run test
+            cd frontend
+            npm install
+            npm run test
         
   # test-backend:
   #   docker:
