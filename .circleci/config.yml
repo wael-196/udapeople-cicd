@@ -361,8 +361,6 @@ workflows:
       #     requires: [cloudfront-update]
       - notify_on_success:
         requires:
-          - build-frontend
-          - build-backend
           - test-frontend
           - test-backend
           - scan-backend
