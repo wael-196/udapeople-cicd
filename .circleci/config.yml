@@ -12,20 +12,16 @@ commands:
           channel: general
           template: basic_fail_1
 
-
-
-# commands:
-#   destroy-environment:
-#     description: Destroy back-end and front-end cloudformation stacks given a workflow ID.
-#     parameters:
-#       # Add parameter here   
-#     steps:
-#       - run:
-#           name: Destroy environments
-#           when: on_fail
-#           command: |
-#             # Your code here
-#             exit 1
+  # destroy-environment:
+  #   description: Destroy back-end and front-end cloudformation stacks given a workflow ID.
+  #   parameters:
+  #     # Add parameter here   
+  #   steps:
+  #     - run:
+  #         name: Destroy environments
+  #         when: on_fail
+  #         command: |
+  #           aws cloudformation delete-stack --stack-name 
 
 #   revert-migrations:
 #     description: Revert the last migration if successfully run in the current workflow.
@@ -189,9 +185,6 @@ jobs:
             aws ec2 describe-instances --filters "Name=tag:Name,Values=backend-${CIRCLE_WORKFLOW_ID:0:7}" --query 'Reservations[*].Instances[*].PublicIpAddress' --output text \ 
             >> .circleci/ansible/inventory.txt
             cat .circleci/ansible/inventory.txt
-
-
-
       - persist_to_workspace:
           root: ~/
           paths:
