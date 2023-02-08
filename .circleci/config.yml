@@ -26,7 +26,18 @@ commands:
             aws cloudformation delete-stack --stack-name "udapeople-backend-<< parameters.WORKFLOW_ID >>"
             aws s3 rm s3://udapeople-<< parameters.WORKFLOW_ID >> --recursive
             aws cloudformation delete-stack --stack-name "udapeople-frontend-<< parameters.WORKFLOW_ID >>"
-            
+  
+  
+  install_ansible:
+    description: Install ansible
+    steps:
+      - run:
+          name: Install Ansible
+          command: |
+            sudo apt update
+            sudo apt install software-properties-common -y
+            sudo add-apt-repository --yes --update ppa:ansible/ansible
+            sudo apt install ansible -y
 
 #   revert-migrations:
 #     description: Revert the last migration if successfully run in the current workflow.
@@ -196,28 +207,27 @@ jobs:
           paths:
             - project/.circleci/ansible/inventory.txt
       - destroy-environment
-      
+
       # Here's where you will add some code to rollback on failure      
 
-#   configure-infrastructure:
-#     docker:
-#       # Docker image here that supports Ansible
-#     steps:
-#       # Checkout code from git
-#       # Add ssh keys with fingerprint
-#       # attach workspace
-#       - run:
-#           name: Install dependencies
-#           command: |
-#             # Your code here
-#             exit 1
-#       - run:
-#           name: Configure server
-#           command: |
-#             # Your code here
-#             exit 1
-#       # Here's where you will add some code to rollback on failure      
-
+  configure-infrastructure:
+    docker:
+      - image: cimg/node:13.8.0
+    steps:
+      - checkout
+      - install_ansible
+      - add_ssh_keys:
+          fingerprints: ["42:9e:a7:d3:8a:74:82:f5:2f:ae:f2:be:90:61:33:c5"]
+      - attach_workspace:
+          at: ~/
+      - run:
+          name: Configure server
+          command: |
+            cd .circleci/ansible
+            cat inventory.txt
+            ansible-playbook -i inventory.txt configure-server.yml
+      - destroy-environment
+      
 #   run-migrations:
 #     docker:
 #       # Docker image here that supports NodeJS
