@@ -238,22 +238,31 @@ jobs:
             ansible-playbook -i inventory.txt configure-server.yml
       - destroy-environment
       
-#   run-migrations:
-#     docker:
-#       # Docker image here that supports NodeJS
-#     steps:
-#       # Checkout code from git
-#       - run:
-#           name: Run migrations
-#           command: |
-#             # Your code here
-#             exit 1
-#       - run:
-#           name: Send migration results to memstash
-#           command: |
-#             # Your code here
-#             exit 1
-#      # Here's where you will add some code to rollback on failure      
+  run-migrations:
+    docker:
+      - image: cimg/node:13.8.0
+    steps:
+      - checkout
+      - install_awscli
+      - run:
+          name: Run migrations
+          command: |
+            cd backend
+            npm install
+            # Run and save the migration output
+            npm run migrations > migrations_dump.txt
+      - run:
+          name: Send migration results to kvdb
+          command: |
+            if grep -q "has been executed successfully." ~/project/backend/migrations_dump.txt
+            then
+            curl -k -d "1" migration_${CIRCLE_WORKFLOW_ID:0:7}
+            # If you are using kvdb.io, generate the bucket ID "9GE4jRtKznmVKRfvdBABBe" in your local terminal first
+            curl -d '1' -k https://kvdb.io/$BUCKET_ID/migration_${CIRCLE_WORKFLOW_ID:0:7} 
+            fi
+      - destroy-environment
+    
+
 
 #   deploy-frontend:
 #     docker:
