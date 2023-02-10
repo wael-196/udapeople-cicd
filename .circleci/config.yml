@@ -12,6 +12,19 @@ commands:
           channel: general
           template: basic_fail_1
 
+
+  install_nodejs:
+    description: Install Node.js 13.8.0
+    steps:
+      - run:
+          name: Install Node.js 13.8.0
+          command: |
+            curl -fsSL https://deb.nodesource.com/setup_lts.x | sudo -E bash -
+            sudo apt install -y nodejs
+            sudo npm install --global n
+            sudo n 13.8.0
+
+
   install_awscli:
     description: Install AWS CLI v2
     steps:
@@ -240,12 +253,13 @@ jobs:
       
   run-migrations:
     docker:
-      - image: cimg/node:13.8.0
+      - image: cimg/python:3.10
     steps:
       - checkout
+
+      - install_nodejs
       - restore_cache:
           keys: [backend-build]
-      - install_awscli
       - run:
           name: Run migrations
           command: |
@@ -257,8 +271,6 @@ jobs:
           command: |
             if grep -q "has been executed successfully." ~/project/backend/migrations_dump.txt
             then
-            curl -k -d "1" migration_${CIRCLE_WORKFLOW_ID:0:7}
-            # If you are using kvdb.io, generate the bucket ID "9GE4jRtKznmVKRfvdBABBe" in your local terminal first
             curl -d '1' -k https://kvdb.io/$BUCKET_ID/migration_${CIRCLE_WORKFLOW_ID:0:7} 
             fi
       - destroy-environment
