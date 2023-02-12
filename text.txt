@@ -1,1 +1,3 @@
 URLs
+S3 frontend
+http://udapeople-eef4369.s3-website-us-east-1.amazonaws.com/
