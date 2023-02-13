@@ -63,20 +63,24 @@ commands:
 
   revert-migrations:
     description: Revert the last migration if successfully run in the current workflow.
+    parameters:
+      Workflow_ID:
+        type: string
+        default: ${CIRCLE_WORKFLOW_ID:0:7}
     steps:
       - run:
           name: Revert migrations
           # when: on_fail
           command: |
-            SUCCESS=$(curl -k https://kvdb.io/$BUCKET_ID/migration_${CIRCLE_WORKFLOW_ID:0:7})
-            echo $SUCCESS
-            # if(( $SUCCESS==1 )); 
-            # then
-            #   cd ~/project/backend
-            #   npm install
-            #   Add revert code here. You can find this in the Getting Started section.
+            SUCCESS=$(curl -k https://kvdb.io/$BUCKET_ID/migration_<<parameters.Workflow_ID>>)
+            echo "$SUCCESS"
+            if(( $SUCCESS==1 )); 
+            then
+                cd ~/project/backend
+                npm install
+                npm run migration:revert
+            fi
             
-            # fi
             
 jobs:
 
@@ -307,23 +311,41 @@ jobs:
           
       # Here's where you will add some code to rollback on failure      
                     
-#   deploy-backend:
-#     docker:
-#       # Docker image here that supports Ansible
-#     steps:
-#       # Checkout code from git
-#       # Add ssh keys with fingerprint
-#       # attach workspace
-#       - run:
-#           name: Install dependencies
-#           command: |
-#             # your code here
-#       - run:
-#           name: Deploy backend
-#           command: |
-#             # your code here
-#       # Here's where you will add some code to rollback on failure  
-
+  deploy-backend:
+    docker:
+      - image: cimg/node:13.8.0
+    steps:
+      - checkout
+      - install_ansible
+      - install_awscli
+      - add_ssh_keys:
+          fingerprints: ["5b:a5:3f:02:98:9b:60:a3:5a:84:e2:b3:1a:1d:bc:e4"]
+      - restore_cache:
+          keys: [backend-build]
+      - attach_workspace:
+          at: ~/
+      - run:
+          name: generating package
+          command: |
+             cd backend
+             npm install
+             npm run build
+             cd ..
+             tar -C backend -czvf artifact.tar.gz .
+             cp artifact.tar.gz  .circleci/ansible/roles/deploy/files
+      - run:
+          name: Deploy build
+          command: |
+             export TYPEORM_MIGRATIONS_DIR=./migrations
+             export TYPEORM_ENTITIES=./modules/domain/**/*.entity{.ts,.js}
+             export TYPEORM_MIGRATIONS=./migrations/*.ts
+             cd .circleci/ansible
+             echo "Contents  of the inventory.txt file is -------"
+             cat inventory.txt
+             ansible-playbook -i inventory.txt deploy-backend.yml
+      - destroy-environment
+      - revert-migrations
+      
 #   smoke-test:
 #     docker:
 #       # Lightweight Docker image 
