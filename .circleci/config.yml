@@ -333,9 +333,11 @@ jobs:
              npm run build
              ls -l
              cd ..
+             echo "running tar"
              tar -C backend -czvf artifact.tar.gz .
              cp artifact.tar.gz  .circleci/ansible/roles/deploy/files
-             ls -l .circleci/ansible/roles/deploy/files
+             echo "running ls"
+             ls -l .circleci/ansible/roles/deploy/files/*
       - run:
           name: Deploy build
           command: |
