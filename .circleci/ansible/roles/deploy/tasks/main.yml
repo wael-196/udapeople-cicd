@@ -5,7 +5,6 @@
     state: directory
 
 - name: "Unarchive backend files"
-  become: true
   unarchive:
     src: artifact.tar.gz
     dest: ~/backend-app
