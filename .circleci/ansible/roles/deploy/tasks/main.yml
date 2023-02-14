@@ -10,13 +10,12 @@
     src: ~/project/.circleci/ansible/roles/deploy/files/artifact.tar.gz
     dest: ~/backend-app
 
-
 - name: "Unarchive backend files"
   become: true
   unarchive:
     src: ~/project/.circleci/ansible/roles/deploy/files/artifact.tar.gz
     dest: ~/backend-app
-    
+
 - name: "Installing Node Dependencies"
   shell: |
     cd ~/backend-app
