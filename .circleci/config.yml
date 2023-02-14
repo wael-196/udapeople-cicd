@@ -72,13 +72,13 @@ commands:
           name: Revert migrations
           when: on_fail
           command: |
-            key=$(curl -k https://kvdb.io/$BUCKET_ID/migration_<<parameters.Workflow_ID>>)
+            key=$(curl -k https://kvdb.io/$BUCKET_ID/migration_af45f97)
             echo "key is ${key}"
             if(( ${key} == 1 )); 
             then
                 cd ~/project/backend
                 npm install
-                npm run migration:revert
+                npm run migrations:revert
             fi
             
             
@@ -360,20 +360,12 @@ jobs:
       - run:
           name: Get backend url
           command: |
-             cd .circleci/ansible
-             echo "Contents  of the inventory.txt file is -------"
-             IP=$(cat inventory.txt | grep -i -v web)
-             export API_URL="http://$IP:3030"
-             echo "${API_URL}"
-      - run:
-          name: Backend smoke test.
-          command: |
-             if curl "${API_URL}/api/status" | grep "ok"
-             then
-                 return 0
-             else
-                 return 1
-             fi
+             BACKEND_IP=$(aws ec2 describe-instances --filters "Name=tag:Name,Values=backend-${CIRCLE_WORKFLOW_ID:0:7}" \
+             --query 'Reservations[*].Instances[*].PublicIpAddress' \
+             --output text)
+             export API_URL="http://${BACKEND_IP}:3030"
+             echo "API_URL = ${API_URL}"
+      
       - run:
           name: Frontend smoke test.
           command: |
@@ -386,8 +378,20 @@ jobs:
              else
                return 1
              fi
-      - destroy-environment
-      - revert-migrations
+      
+      - run:
+          name: Backend smoke test.
+          command: |
+             echo "${API_URL}"
+             if curl "${API_URL}/api/status" | grep "ok"
+             then
+                 return 0
+             else
+                 return 1
+             fi
+      
+      # - destroy-environment
+      # - revert-migrations
       # Here's where you will add some code to rollback on failure  
 
 #   cloudfront-update:
