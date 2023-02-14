@@ -74,7 +74,7 @@ commands:
           command: |
             key=$(curl -k https://kvdb.io/$BUCKET_ID/migration_<<parameters.Workflow_ID>>)
             echo "key is ${key}"
-            if(( ${key}==1 )); 
+            if(( ${key} == 1 )); 
             then
                 cd ~/project/backend
                 npm install
