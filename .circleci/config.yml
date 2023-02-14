@@ -63,7 +63,6 @@ commands:
 
   revert-migrations:
     description: Revert the last migration if successfully run in the current workflow.
-    when: on_fail
     parameters:
       Workflow_ID:
         type: string
