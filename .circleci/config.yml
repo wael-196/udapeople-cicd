@@ -361,7 +361,7 @@ jobs:
           command: |
              cd .circleci/ansible
              echo "Contents  of the inventory.txt file is -------"
-             IP=$(cat inventory.txt)
+             IP=$(cat inventory.txt | grep -i -v web)
              export API_URL="http://$IP:3030"
              echo "${API_URL}"
       - run:
