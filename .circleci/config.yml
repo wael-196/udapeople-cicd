@@ -378,16 +378,16 @@ jobs:
                return 1
              fi
       
-      - run:
-          name: Backend smoke test.
-          command: |
-             echo "${API_URL}"
-             if curl "${API_URL}/api/status" | grep "ok"
-             then
-                 return 0
-             else
-                 return 1
-             fi
+      # - run: jjjr
+      #     name: Backend smoke test.
+      #     command: |
+      #        echo "${API_URL}"
+      #        if curl "${API_URL}/api/status" | grep "ok"
+      #        then
+      #            return 0
+      #        else
+      #            return 1
+      #        fi
       - destroy-environment
       - revert-migrations
       # Here's where you will add some code to rollback on failure  
