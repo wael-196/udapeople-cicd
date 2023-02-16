@@ -72,7 +72,7 @@ commands:
           name: Revert migrations
           when: on_fail
           command: |
-            key=$(curl -k https://kvdb.io/$BUCKET_ID/migration_<< parameters.WORKFLOW_ID >>)
+            key=$(curl -k https://kvdb.io/$BUCKET_ID/migration_<< parameters.Workflow_ID >>)
             echo "key is ${key}"
             if(( ${key} == 1 )); 
             then
