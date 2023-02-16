@@ -72,7 +72,7 @@ commands:
           name: Revert migrations
           when: on_fail
           command: |
-            key=$(curl -k https://kvdb.io/$BUCKET_ID/migration_bfb2d1f)
+            key=$(curl -k https://kvdb.io/$BUCKET_ID/migration_<< parameters.WORKFLOW_ID >>)
             echo "key is ${key}"
             if(( ${key} == 1 )); 
             then
@@ -396,9 +396,15 @@ jobs:
       - install_nodejs
       - install_awscli
       - run:
-          name: Install dependencies
+          name: Get old stack workflow id
           command: |
-            # your code here
+            # Fetch the Old workflow ID
+            export OldWorkflowID=$(aws cloudformation \
+            list-exports --query "Exports[?Name==\`WorkflowID\`].Value" \
+            --no-paginate --output text)
+            echo OldWorkflowID: "${OldWorkflowID}"
+            echo "${OldWorkflowID}" > ~/OldWorkflowID.txt
+            cat ~/OldWorkflowID.txt      
       - run:
           name: Update cloudfront distribution
           command: |
@@ -407,6 +413,10 @@ jobs:
             --stack-name InitialStack \
             --parameter-overrides WorkflowID="${CIRCLE_WORKFLOW_ID:0:7}" \
             --tags project=udapeople
+      - persist_to_workspace:
+          root: ~/
+          paths:
+            - ~/OldWorkflowID.txt  
       - destroy-environment
       - revert-migrations
 
@@ -417,13 +427,12 @@ cleanup:
       - checkout
       - install_nodejs
       - install_awscli
+      - attach_workspace:
+          at: ~/
       - run:
           name: Get old stack workflow id
           command: |
-            # Fetch the Old workflow ID
-            export OldWorkflowID=$(aws cloudformation \
-            list-exports --query "Exports[?Name==\`WorkflowID\`].Value" \
-            --no-paginate --output text)
+            export OldWorkflowID= cat ~/OldWorkflowID.txt
             echo OldWorkflowID: "${OldWorkflowID}"
             echo CIRCLE_WORKFLOW_ID "${CIRCLE_WORKFLOW_ID:0:7}"
             # Fetch the stack names          
@@ -439,7 +448,7 @@ cleanup:
                 aws cloudformation delete-stack --stack-name "udapeople-backend-${OldWorkflowID}"
                 aws cloudformation delete-stack --stack-name "udapeople-frontend-${OldWorkflowID}"
               fi
-            
+      
 
 workflows:
   default:
@@ -471,8 +480,8 @@ workflows:
           requires: [deploy-backend, deploy-frontend]
       - cloudfront-update:
           requires: [smoke-test]
-      # - cleanup:
-      #     requires: [cloudfront-update]
+      - cleanup:
+          requires: [cloudfront-update]
       # - notify_on_success:
       #     requires:
       #       - test-frontend
