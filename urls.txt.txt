@@ -1,3 +1,10 @@
 URLs
-S3 frontend
-http://udapeople-eef4369.s3-website-us-east-1.amazonaws.com/
+Github Url
+https://github.com/wael-196/udapeople-cicd.git
+
+Frontend url 
+
+Cloudfront
+http://d1dw57ptximlqk.cloudfront.net/#/employees
+S3 Url
+http://udapeople-83dc954.s3-website.us-east-1.amazonaws.com/#/employees
