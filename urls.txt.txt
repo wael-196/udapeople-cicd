@@ -5,6 +5,6 @@ https://github.com/wael-196/udapeople-cicd.git
 Frontend url 
 
 Cloudfront
-http://d1dw57ptximlqk.cloudfront.net/#/employees
+http://d27haaxsi47qy1.cloudfront.net/#/employees
 S3 Url
-http://udapeople-83dc954.s3-website.us-east-1.amazonaws.com/#/employees
+http://udapeople-544aa6a.s3-website.us-east-1.amazonaws.com/#/employees
